@@ -44,7 +44,7 @@ def perform_login(driver, username: str, password: str, timeout: Optional[int] =
 
         driver.find_element(By.XPATH, sm_sel.XPATH_LOGIN_BUTTON).click()
 
-        wait.until(EC.presence_of_element_located((By.XPATH, sm_sel.XPATH_HEADER_CONTAINER)))
+        wait.until(EC.presence_of_element_located((By.XPATH, sm_sel.XPATH_TIMETABLE_MENU_LINK)))
         return True
     except TimeoutException as e:
         raise RuntimeError("Login timed out before reaching the post-login page.") from e

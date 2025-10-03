@@ -70,10 +70,8 @@ def navigate_to_timetable_nr10(driver, timeout: Optional[int] = None) -> bool:
     wait = WebDriverWait(driver, wait_timeout)
 
     try:
-        # Ensure we are on the post-login main page
-        wait.until(EC.presence_of_element_located((By.XPATH, sm_sel.XPATH_HEADER_CONTAINER)))
-
-        # Click the hidden menu link directly (no hover): //a[@id='sm-31']
+        # Click the hidden menu link directly (no hover): //a[@id='sm-31'] in default content
+        print("Waiting for timetable menu link...")
         menu_link = wait.until(EC.presence_of_element_located((By.XPATH, sm_sel.XPATH_TIMETABLE_MENU_LINK)))
         try:
             driver.execute_script("arguments[0].click();", menu_link)
@@ -84,8 +82,26 @@ def navigate_to_timetable_nr10(driver, timeout: Optional[int] = None) -> bool:
             except Exception:
                 pass
 
+        # Switch into the main content iframe before clicking Nr_10
+        print("Switching into main content iframe before clicking Nr_10...")
+        try:
+            driver.switch_to.default_content()
+        except Exception:
+            pass
+        wait.until(EC.frame_to_be_available_and_switch_to_it((By.XPATH, sm_sel.XPATH_MAIN_IFRAME)))
+        # Inside main iframe there is a frameset with left and right frames; go to right content frame
+        try:
+            wait.until(EC.frame_to_be_available_and_switch_to_it((By.XPATH, sm_sel.XPATH_RIGHT_FRAME)))
+        except Exception:
+            # If right frame not available immediately, try brief fallback wait then proceed
+            try:
+                WebDriverWait(driver, 2).until(EC.frame_to_be_available_and_switch_to_it((By.XPATH, sm_sel.XPATH_RIGHT_FRAME)))
+            except Exception:
+                pass
+
         # Wait for the Nr_10 row and click it
         pre_handles = set(driver.window_handles)
+        print("Waiting for Nr_10 row...")
         nr10_row = wait.until(EC.presence_of_element_located((By.XPATH, sm_sel.XPATH_NR10_ROW)))
         try:
             nr10_row.click()
@@ -103,6 +119,17 @@ def navigate_to_timetable_nr10(driver, timeout: Optional[int] = None) -> bool:
             try:
                 driver.switch_to.window(new_handles[-1])
             except Exception:
+                pass
+            # After switching window, reset and try to switch into iframe -> right content frame again if present
+            try:
+                driver.switch_to.default_content()
+                WebDriverWait(driver, 5).until(EC.frame_to_be_available_and_switch_to_it((By.XPATH, sm_sel.XPATH_MAIN_IFRAME)))
+                try:
+                    WebDriverWait(driver, 5).until(EC.frame_to_be_available_and_switch_to_it((By.XPATH, sm_sel.XPATH_RIGHT_FRAME)))
+                except Exception:
+                    pass
+            except Exception:
+                # If iframe isn't there, continue in current context
                 pass
 
         # Final wait for calendar content

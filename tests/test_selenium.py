@@ -33,6 +33,7 @@ def test_actual_smartmedical_site():
     with browser() as driver:
         # Perform login using credentials from environment/settings
         assert auth.login(driver=driver), "Login failed"
+        print("Login successful.")
 
         # Navigate to the timetable/calendar (Nr_10 as implemented)
         assert navigation.navigate_to_timetable_nr10(driver), "Failed to open timetable/calendar"
