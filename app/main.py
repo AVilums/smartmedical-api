@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import uvicorn
-from app.config import get_settings
+from app.core.config import get_settings
 
 # Re-export FastAPI app built in the new API layer
 from app.api.app import app  # noqa: F401

@@ -5,12 +5,12 @@ import logging
 from fastapi import APIRouter, Depends, HTTPException
 from starlette import status
 
-from app.config import get_settings
-from app.errors import ErrorCodes
-from app.schemas import BookingRequest, BookingResponse, ErrorResponse
+from app.core.config import get_settings
+from app.core.exceptions import ErrorCodes
+from app.core.schemas import BookingRequest, BookingResponse, ErrorResponse
 from app.api.dependencies import principal_id
-from app.rate_limit import enforce_rate_limit
-from app.selenium_client import SmartMedicalClient
+from app.infrastructure.rate_limit import enforce_rate_limit
+from app.infrastructure.selenium_client import SmartMedicalClient
 
 logger = logging.getLogger(__name__)
 

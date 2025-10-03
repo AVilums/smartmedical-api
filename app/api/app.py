@@ -7,9 +7,9 @@ from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
 from starlette import status
 
-from app.config import get_settings
-from app.errors import ErrorCodes, unhandled_exception_handler, validation_exception_handler
-from app.logging_config import configure_logging
+from app.core.config import get_settings
+from app.core.exceptions import ErrorCodes, unhandled_exception_handler, validation_exception_handler
+from app.infrastructure.logging_config import configure_logging
 
 logger = logging.getLogger(__name__)
 

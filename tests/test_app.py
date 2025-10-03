@@ -9,8 +9,8 @@ from fastapi.testclient import TestClient
 def make_client(env: dict) -> TestClient:
     os.environ.update(env)
     # Clear cached settings and limiter singleton before import
-    import app.config as cfg
-    import app.rate_limit as rl
+    import app.core.config as cfg
+    import app.infrastructure.rate_limit as rl
     cfg.get_settings.cache_clear()  # type: ignore[attr-defined]
     rl._limiter = None  # type: ignore[attr-defined]
 

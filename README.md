@@ -29,14 +29,15 @@ Important: The actual SmartMedical scraping and booking automation is intentiona
 - Deployed next to n8n (e.g., via Coolify) and accessed over local/private network
 
 Key modules:
-- app/config.py – Pydantic settings from env/.env
-- app/logging_config.py – PII-safe logging
-- app/security.py – API key dependency and principal hashing
-- app/rate_limit.py – in-memory token-bucket limiter
-- app/schemas.py – Pydantic models for requests/responses
-- app/errors.py – consistent error responses
-- app/selenium_client.py – Selenium setup + SmartMedicalClient placeholders
-- app/main.py – FastAPI app, endpoints, CORS, timeouts
+- app/core/config.py – Pydantic settings from env/.env
+- app/infrastructure/logging_config.py – PII-safe logging
+- app/infrastructure/security.py – API key dependency and principal hashing
+- app/infrastructure/rate_limit.py – in-memory token-bucket limiter
+- app/core/schemas.py – Pydantic models for requests/responses
+- app/core/exceptions.py – consistent error responses
+- app/infrastructure/selenium_client.py – Selenium setup + SmartMedicalClient placeholders
+- app/api/app.py – FastAPI app, routers, CORS, timeouts
+- app/main.py – entrypoint wrapper (uvicorn app:app)
 
 
 ## Security Model
