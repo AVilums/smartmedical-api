@@ -17,7 +17,7 @@ from app.smartmedical import selectors as sm_sel
 
 
 def perform_login(driver, username: str, password: str, timeout: Optional[int] = None) -> bool:
-    """Log in using provided driver and credentials. Returns True on success.
+    """Log in using a provided driver and credentials. Returns True on success.
 
     Raises RuntimeError on timeout or unexpected page state.
     """
@@ -56,7 +56,7 @@ def login(
     driver=None,
     timeout: Optional[int] = None,
 ) -> bool:
-    """Perform login. Uses existing driver if provided; otherwise manages lifecycle.
+    """Perform login. Uses an existing driver if provided; otherwise manages lifecycle.
 
     Credentials default to SMARTMEDICAL_USERNAME/PASSWORD.
     """

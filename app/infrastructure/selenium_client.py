@@ -15,8 +15,8 @@ def _build_chrome_options(settings) -> ChromeOptions:
     options = ChromeOptions()
     # Container-friendly flags
     # Headless only if explicitly requested via BROWSER starting with "headless"
-    browser = (getattr(settings, "browser", None) or "headless-chrome").lower()
-    if browser.startswith("headless"):
+    browser_ = (getattr(settings, "browser", None) or "headless-chrome").lower()
+    if browser_.startswith("headless"):
         options.add_argument("--headless=new")
     options.add_argument("--disable-gpu")
     options.add_argument("--no-sandbox")

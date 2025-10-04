@@ -5,7 +5,6 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
-from starlette import status
 
 from app.core.config import get_settings
 from app.core.exceptions import ErrorCodes, unhandled_exception_handler, validation_exception_handler
@@ -38,7 +37,7 @@ app.add_exception_handler(Exception, unhandled_exception_handler)
 app.add_exception_handler(RequestValidationError, validation_exception_handler)
 
 
-# Ensure consistent schema for HTTPException to {"error": ...}
+# Ensure a consistent schema for HTTPException to {"error": ...}
 @app.exception_handler(HTTPException)
 async def http_exception_to_json(request: Request, exc: HTTPException):
     content = {"error": exc.detail if isinstance(exc.detail, str) else ErrorCodes.INTERNAL_ERROR}

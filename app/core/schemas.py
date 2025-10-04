@@ -2,16 +2,6 @@ from pydantic import BaseModel
 from typing import Optional, List
 
 
-class TimetableRequest(BaseModel):
-    doctor: Optional[str] = None
-    date: Optional[str] = None
-
-
-class TimeSlot(BaseModel):
-    time: str
-    available: bool = True
-
-
 class TimetableResponse(BaseModel):
     doctor: Optional[str] = None
     date: Optional[str] = None
@@ -22,7 +12,7 @@ class TimetableResponse(BaseModel):
 class PatientInfo(BaseModel):
     first_name: str
     last_name: str
-    phone: Optional[str] = None
+    phone: str = None
     email: Optional[str] = None
     personal_code: Optional[str] = None
 

@@ -9,6 +9,7 @@ from __future__ import annotations
 import re
 import time
 from typing import Any, Dict, List, Optional, Tuple
+from datetime import date
 
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -51,10 +52,14 @@ def fetch_timetable() -> Dict[str, Any]:
                 except Exception:
                     break
 
+    # Filter out slots with dates that have already passed
+    today_iso = date.today().isoformat()
+    future_slots = [s for s in scraped_slots if isinstance(s, dict) and s.get("date") and s["date"] >= today_iso]
+
     return {
         "doctor": None,
         "date": None,
-        "slots": scraped_slots,
+        "slots": future_slots,
         "source": "smartmedical",
     }
 
@@ -77,8 +82,12 @@ def _scrape_week(driver, settings) -> Tuple[List[Dict[str, Any]], List[str]]:
     all_elems = driver.find_elements(By.XPATH, sm_sel.XPATH_ALL_TIMESLOTS)
     res_elems = driver.find_elements(By.XPATH, sm_sel.XPATH_ALL_RESERVATIONS)
 
-    day_to_potentials: Dict[str, List[Tuple[int, int]]] = {}
-    day_to_reservations: Dict[str, List[Tuple[int, int]]] = {}
+    # Keyed by (date, doctor)
+    pot_map: Dict[Tuple[str, Optional[str]], List[Tuple[int, int]]] = {}
+    res_map: Dict[Tuple[str, Optional[str]], List[Tuple[int, int]]] = {}
+    # Reservations with no doctor parsed will be subtracted from all doctors on that date
+    res_unknown_by_date: Dict[str, List[Tuple[int, int]]] = {}
+
     week_dates: set[str] = set()
 
     # Collect potential intervals from WorkTimeNotEditable
@@ -86,15 +95,16 @@ def _scrape_week(driver, settings) -> Tuple[List[Dict[str, Any]], List[str]]:
         try:
             title = el.get_attribute("title") or ""
             elem_id = el.get_attribute("id") or ""
-            start_s, end_s, _doc = _parse_time_range_and_doctor_from_work(title)
+            start_s, end_s, doc = _parse_time_range_and_doctor_from_work(title)
             date = _extract_date_from_id(elem_id) or _closest_date_via_dom(driver, el)
             if not (start_s and end_s and date):
                 continue
             start_m, end_m = _to_minutes(start_s), _to_minutes(end_s)
             if start_m is None or end_m is None or end_m <= start_m:
                 continue
+            doc = (doc or "").strip() or None
             week_dates.add(date)
-            day_to_potentials.setdefault(date, []).append((start_m, end_m))
+            pot_map.setdefault((date, doc), []).append((start_m, end_m))
         except Exception:
             continue
 
@@ -102,7 +112,7 @@ def _scrape_week(driver, settings) -> Tuple[List[Dict[str, Any]], List[str]]:
     for el in res_elems:
         try:
             title = el.get_attribute("title") or ""
-            start_s, end_s, _doc = _parse_time_range_and_doctor_from_res(title)
+            start_s, end_s, doc = _parse_time_range_and_doctor_from_res(title)
             # Try to resolve date via DOM proximity
             date = _closest_date_via_dom(driver, el)
             if not date:
@@ -117,22 +127,32 @@ def _scrape_week(driver, settings) -> Tuple[List[Dict[str, Any]], List[str]]:
             if start_m is None or end_m is None or end_m <= start_m:
                 continue
             week_dates.add(date)
-            day_to_reservations.setdefault(date, []).append((start_m, end_m))
+            doc = (doc or "").strip() or None
+            if doc is None:
+                res_unknown_by_date.setdefault(date, []).append((start_m, end_m))
+            else:
+                res_map.setdefault((date, doc), []).append((start_m, end_m))
         except Exception:
             continue
 
-    # Compute free intervals per day: union(potential) - union(reservations)
+    # Compute free intervals per (date, doctor): union(potential) - union(reservations)
     free_slots: List[Dict[str, Any]] = []
-    for date in sorted(week_dates):
-        pot = _merge_intervals(day_to_potentials.get(date, []))
-        occ = _merge_intervals(day_to_reservations.get(date, []))
+    # Determine all doctor keys present in potentials
+    for (date, doc) in sorted(pot_map.keys(), key=lambda k: (k[0], k[1] or "")):
+        pot = _merge_intervals(pot_map.get((date, doc), []))
+        # Reservations for this doctor
+        occ_for_doc = _merge_intervals(res_map.get((date, doc), []))
+        # Plus any unknown reservations that should block all doctors that day
+        occ_unknown = _merge_intervals(res_unknown_by_date.get(date, []))
+        # Merge both occupied sets
+        occ = _merge_intervals(occ_for_doc + occ_unknown)
         free = _subtract_intervals(pot, occ)
         for start_m, end_m in free:
             free_slots.append({
                 "date": date,
                 "start": _to_hhmm(start_m),
                 "end": _to_hhmm(end_m),
-                "doctor": None,
+                "doctor": doc,
                 "type": "free",
             })
 

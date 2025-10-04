@@ -60,7 +60,7 @@ def get_settings() -> "Settings":
     val = os.environ.get("ALLOWED_ORIGINS")
     if isinstance(val, str):
         s = val.strip()
-        # If user provided '*' or comma-separated list like 'http://a, http://b',
+        # If a user provided '*' or a comma-separated list like 'http://a, http://b',
         # convert it to a JSON array string so pydantic_settings won't try to json.loads('*').
         if s and not s.startswith("["):
             if s == "*":

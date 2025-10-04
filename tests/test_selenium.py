@@ -1,8 +1,10 @@
-import os
+import pytest
 from app.infrastructure.selenium_client import browser
-from app.core.config import get_settings
 
-# Load your environment
+# Mark this entire module as local-only (requires Selenium and credentials)
+pytestmark = pytest.mark.local
+
+# Load your environment (used only for local runs)
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -54,5 +56,5 @@ if __name__ == "__main__":
     # Test basic Selenium setup
     test_selenium_basic()
 
-    # Test actual site (when you're ready)
+    # Test the actual site
     test_actual_smartmedical_site()

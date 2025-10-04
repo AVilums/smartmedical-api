@@ -15,11 +15,6 @@ class ErrorCodes:
     TIMEOUT = "timeout"
 
 
-def http_exception_handler(request: Request, exc):
-    # FastAPI already turns HTTPException into JSON; let default handle it.
-    return None
-
-
 def validation_exception_handler(request: Request, exc: RequestValidationError):
     return JSONResponse(
         status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
