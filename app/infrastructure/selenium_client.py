@@ -13,8 +13,6 @@ from app.core.config import get_settings
 
 def _build_chrome_options(settings) -> ChromeOptions:
     options = ChromeOptions()
-    # Container-friendly flags
-    # Headless only if explicitly requested via BROWSER starting with "headless"
     browser_ = (getattr(settings, "browser", None) or "headless-chrome").lower()
     if browser_.startswith("headless"):
         options.add_argument("--headless=new")
@@ -55,6 +53,7 @@ def browser() -> Generator[webdriver.Chrome, None, None]:
         if driver is not None:
             try:
                 driver.quit()
-            except Exception:
+            except Exception as e:
+                print(f"Exceptions: {e}")
                 pass
 

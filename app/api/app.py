@@ -5,6 +5,11 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+
+
+class UTF8JSONResponse(JSONResponse):
+    # Ensure PowerShell and other clients correctly decode the JSON as UTF-8
+    media_type = "application/json; charset=utf-8"
 from fastapi.exceptions import RequestValidationError
 
 from app.core.config import get_settings
@@ -20,7 +25,7 @@ async def lifespan(app: FastAPI):
     logger.info("Service starting", extra={"bind": f"{s.bind_host}:{s.port}", "log_json": s.log_json})
     yield
 
-app = FastAPI(title="SmartMedical Automation Service", version="0.1.0", lifespan=lifespan)
+app = FastAPI(title="SmartMedical Automation Service", version="0.1.0", lifespan=lifespan, default_response_class=UTF8JSONResponse)
 
 
 # CORS
@@ -42,7 +47,7 @@ app.add_exception_handler(RequestValidationError, validation_exception_handler)
 @app.exception_handler(HTTPException)
 async def http_exception_to_json(request: Request, exc: HTTPException):
     content = {"error": exc.detail if isinstance(exc.detail, str) else ErrorCodes.INTERNAL_ERROR}
-    return JSONResponse(status_code=exc.status_code, content=content)
+    return UTF8JSONResponse(status_code=exc.status_code, content=content)
 
 
 # Security headers middleware

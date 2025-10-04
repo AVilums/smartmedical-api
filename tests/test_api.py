@@ -19,6 +19,8 @@ def test_health_endpoint(client):
     response = client.get("/health")
     assert response.status_code == 200, "Health endpoint failed"
     assert response.json() == {"status": "ok"}, "Health endpoint response mismatch"
+    # Ensure UTF-8 charset is specified for JSON to avoid mojibake in some clients (e.g., PowerShell)
+    assert "charset=utf-8" in response.headers.get("content-type", "").lower()
 
 
 def test_unauthorized_timetable_access(client):
@@ -27,6 +29,7 @@ def test_unauthorized_timetable_access(client):
     """
     response = client.get("/timetable")  # No API key provided
     assert response.status_code == 401, "Unauthorized timetable access did not return 401"
+    assert "charset=utf-8" in response.headers.get("content-type", "").lower()
 
 
 def test_invalid_api_key(client):

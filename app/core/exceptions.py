@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from fastapi import Request
 from fastapi.responses import JSONResponse
+
+UTF8_MEDIA_TYPE = "application/json; charset=utf-8"
 from fastapi.exceptions import RequestValidationError
 from starlette import status
 
@@ -22,6 +24,7 @@ def validation_exception_handler(request: Request, exc: RequestValidationError):
             "error": ErrorCodes.BAD_REQUEST,
             "detail": exc.errors(),
         },
+        media_type=UTF8_MEDIA_TYPE,
     )
 
 
@@ -32,4 +35,5 @@ def unhandled_exception_handler(request: Request, exc: Exception):
             "error": ErrorCodes.INTERNAL_ERROR,
             "detail": "An unexpected error occurred",
         },
+        media_type=UTF8_MEDIA_TYPE,
     )
