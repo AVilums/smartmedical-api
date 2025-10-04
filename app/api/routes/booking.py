@@ -10,7 +10,6 @@ from app.core.exceptions import ErrorCodes
 from app.core.schemas import BookingRequest, BookingResponse, ErrorResponse
 from app.api.dependencies import principal_id
 from app.infrastructure.rate_limit import enforce_rate_limit
-from app.infrastructure.selenium_client import SmartMedicalClient
 
 logger = logging.getLogger(__name__)
 
@@ -35,10 +34,7 @@ async def book(
     s = get_settings()
 
     try:
-        async with asyncio.timeout(s.request_timeout):
-            client = SmartMedicalClient()
-            _ = client.book(booking_payload=payload.model_dump())
-            return BookingResponse(status="success", booking_id="TBD", message="Booking complete")
+        raise NotImplementedError("Booking not implemented")
     except NotImplementedError as exc:
         logger.info("Booking not implemented", extra={"route": "/book", "principal": pid})
         raise HTTPException(status_code=status.HTTP_501_NOT_IMPLEMENTED, detail=str(exc))

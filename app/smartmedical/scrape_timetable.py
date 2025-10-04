@@ -8,7 +8,6 @@ from __future__ import annotations
 
 import re
 import time
-from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional, Tuple
 
 from selenium.webdriver.common.by import By
@@ -21,7 +20,7 @@ from app.smartmedical.auth import login as sm_login
 from app.smartmedical.navigation import navigate_to_timetable_nr10
 from app.smartmedical import selectors as sm_sel
 
-def fetch_timetable(doctor: Optional[str] = None, date_str: Optional[str] = None) -> Dict[str, Any]:
+def fetch_timetable() -> Dict[str, Any]:
     """Fetch free timetable slots for the next 5 weeks from SmartMedical.
 
     Simplified per requirements: just scrape the current week and then click

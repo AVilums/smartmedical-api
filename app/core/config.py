@@ -39,8 +39,6 @@ class Settings(BaseSettings):
 
     # Selenium / Browser
     browser: str = Field(default="headless-chrome", alias="BROWSER")
-    chrome_binary_path: str | None = Field(default=None, alias="CHROME_BINARY_PATH")
-    chromedriver_path: str | None = Field(default=None, alias="CHROMEDRIVER_PATH")
     selenium_remote_url: str | None = Field(default=None, alias="SELENIUM_REMOTE_URL")
 
     # SmartMedical

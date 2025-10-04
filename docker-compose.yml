@@ -1,0 +1,31 @@
+version: '3.9'
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: smartmedical-api:local
+    container_name: smartmedical-web
+    env_file:
+      - .env
+    environment:
+      - BIND_HOST=0.0.0.0
+      - SELENIUM_REMOTE_URL=http://selenium:4444/wd/hub
+      - PORT=8080
+    ports:
+      - "8080:8080"
+    depends_on:
+      - selenium
+    restart: unless-stopped
+
+  selenium:
+    image: selenium/standalone-chrome:123.0
+    container_name: selenium
+    shm_size: "2gb"
+    environment:
+      - SE_NODE_MAX_SESSIONS=1
+      - SE_NODE_SESSION_TIMEOUT=300
+    ports:
+      - "4444:4444"
+    restart: unless-stopped
