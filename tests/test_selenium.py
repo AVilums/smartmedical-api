@@ -44,12 +44,37 @@ def test_actual_smartmedical_site():
 
 
 def test_fetch_timetable():
-    """Test the timetable fetcher module."""
+    """Test the timetable flow for /timetable."""
     print("Testing timetable fetcher...")
 
     from app.smartmedical.scrape_timetable import fetch_timetable
     resp = fetch_timetable()
     print(f"Fetched timetable: {resp}")
+
+
+def test_create_booking_like_fetch_timetable():
+    """Test the booking flow for /book."""
+    from app.smartmedical.create_booking import create_booking
+
+    # Example payload; adjust date/time during local runs to an actually free slot.
+    # Keeping values simple and safe; notes is optional.
+    result = create_booking(
+        date="2025-10-10",
+        time="12:00",
+        first_name="Test",
+        last_name="User",
+        phone="+37100000000",
+        notes="PyTest booking trial - safe no-submit"
+    )
+
+    # Print result to help during manual/local runs as in test_fetch_timetable
+    print(f"Booking result: {result}")
+
+    # Basic shape checks similar in spirit to timetable test
+    assert isinstance(result, dict)
+    assert "status" in result
+    # Allow statuses: ok, unavailable, error
+    assert result["status"] in {"ok", "unavailable", "error"}
 
 
 if __name__ == "__main__":

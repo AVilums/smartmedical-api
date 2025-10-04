@@ -30,6 +30,17 @@ XPATH_WEEK_NEXT_BUTTON = "//img[contains(@src,'btt-right.gif') and contains(@onc
 XPATH_ALL_TIMESLOTS = "//div[@class='WorkTimeNotEditable']"
 XPATH_ALL_RESERVATIONS = "//div[@class='Reservation']"
 
+# Booking popup/iframe and fields
+XPATH_RESERVATION_IFRAME = "//iframe[contains(@src,'/MAIN/f_reservations/')]"
+XPATH_INPUT_FIRST_NAME = "//input[@id='pacient[name]']"
+XPATH_INPUT_LAST_NAME = "//input[@id='pacient[surname]']"
+XPATH_INPUT_PHONE = "//input[@id='pacient[phone]']"
+XPATH_TEXTAREA_NOTES = "//textarea[@id='notes']"
+XPATH_SAVE_BUTTON = "//input[@id='save']"
+
+# For verification
+XPATH_TIME_FROM = "//input[@id='time_from']"
+
 # Placeholders for future flows
 TIMETABLE_TABLE = "#timetable"
 BOOK_BUTTON = "#book-btn"

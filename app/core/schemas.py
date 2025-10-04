@@ -9,19 +9,12 @@ class TimetableResponse(BaseModel):
     source: str = "smartmedical"
 
 
-class PatientInfo(BaseModel):
-    first_name: str
-    last_name: str
-    phone: str = None
-    email: Optional[str] = None
-    personal_code: Optional[str] = None
-
-
 class BookingRequest(BaseModel):
-    doctor: str
     date: str
     time: str
-    patient: PatientInfo
+    first_name: str
+    last_name: str
+    phone: str
     notes: Optional[str] = None
 
 
