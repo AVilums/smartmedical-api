@@ -25,6 +25,11 @@ XPATH_CALENDAR_CONTAINER_CANDIDATES = [
     "//div[contains(@class,'calendar')]",
 ]
 
+# Calendar scraping
+XPATH_WEEK_NEXT_BUTTON = "//img[contains(@src,'btt-right.gif') and contains(@onclick, \"MoveCalendar('week', 1)\")]"
+XPATH_ALL_TIMESLOTS = "//div[@class='WorkTimeNotEditable']"
+XPATH_ALL_RESERVATIONS = "//div[@class='Reservation']"
+
 # Placeholders for future flows
 TIMETABLE_TABLE = "#timetable"
 BOOK_BUTTON = "#book-btn"

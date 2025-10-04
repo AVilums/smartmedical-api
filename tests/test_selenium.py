@@ -41,6 +41,15 @@ def test_actual_smartmedical_site():
         print(f"Navigation successful. Current URL: {driver.current_url}")
 
 
+def test_fetch_timetable():
+    """Test the timetable fetcher module."""
+    print("Testing timetable fetcher...")
+
+    from app.smartmedical.scrape_timetable import fetch_timetable
+    resp = fetch_timetable()
+    print(f"Fetched timetable: {resp}")
+
+
 if __name__ == "__main__":
     # Test basic Selenium setup
     test_selenium_basic()

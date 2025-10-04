@@ -14,7 +14,7 @@ from app.core.schemas import TimetableResponse, ErrorResponse
 from app.api.dependencies import principal_id
 from app.infrastructure.rate_limit import enforce_rate_limit
 from app.smartmedical.auth import login as sm_login
-from app.smartmedical.scraping import fetch_timetable
+from app.smartmedical.scrape_timetable import fetch_timetable
 
 logger = logging.getLogger(__name__)
 
@@ -42,19 +42,15 @@ async def get_timetable(
 
     try:
         async with asyncio.timeout(s.request_timeout):
-            # Conditional login before requesting timetable
-            if getattr(s, "smartmedical_login_on_timetable", False) and s.smartmedical_username and s.smartmedical_password:
-                try:
-                    # Run blocking Selenium login in a thread to avoid blocking the event loop
-                    await asyncio.to_thread(sm_login)
-                    logger.info("SmartMedical login attempted before timetable", extra={"route": "/timetable", "principal": pid})
-                except Exception as e:
-                    logger.warning("SmartMedical login failed/skipped", extra={"route": "/timetable", "principal": pid, "error": str(e)})
-            # Fetch timetable via scraping module (runs in a thread to avoid blocking loop)
+            # Enforce credentials presence; new flow does not support placeholders
+            if not (s.smartmedical_username and s.smartmedical_password):
+                raise HTTPException(status_code=status.HTTP_501_NOT_IMPLEMENTED, detail="SmartMedical credentials are not provided (username/password).")
+
+            # Scrape timetable via scraping module (run in a thread to avoid blocking loop)
             resp = await asyncio.to_thread(
                 fetch_timetable,
-                doctor=doctor,
-                date_str=(date_param.isoformat() if date_param else None),
+                doctor=None,  # doctor filter removed per new requirements
+                date_str=None,
             )
             return TimetableResponse(**resp)
     except NotImplementedError as exc:
