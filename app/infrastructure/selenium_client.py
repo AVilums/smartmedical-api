@@ -44,15 +44,9 @@ def browser() -> Generator[webdriver.Chrome, None, None]:
                 options=options,
             )
         else:
-            # Local ChromeDriver with auto-management
-            if settings.chromedriver_path:
-                # Use manually specified path if provided
-                service = ChromeService(executable_path=settings.chromedriver_path)
-                driver = webdriver.Chrome(service=service, options=options)
-            else:
-                # Auto-install and manage ChromeDriver
-                service = ChromeService(ChromeDriverManager().install())
-                driver = webdriver.Chrome(service=service, options=options)
+            # Auto-install and manage ChromeDriver
+            service = ChromeService(ChromeDriverManager().install())
+            driver = webdriver.Chrome(service=service, options=options)
 
         driver.set_page_load_timeout(settings.selenium_pageload_timeout)
         driver.implicitly_wait(settings.selenium_implicit_wait)
