@@ -6,6 +6,7 @@ from typing import Generator, List, Optional
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options as ChromeOptions
 from selenium.webdriver.chrome.service import Service as ChromeService
+from webdriver_manager.chrome import ChromeDriverManager
 
 from app.core.config import get_settings
 
@@ -31,7 +32,7 @@ def browser() -> Generator[webdriver.Chrome, None, None]:
     """Context manager that yields a configured Chrome WebDriver.
 
     - If SELENIUM_REMOTE_URL is provided, connects to a remote Selenium node (Docker/Grid).
-    - Otherwise, starts a local ChromeDriver instance.
+    - Otherwise, starts a local ChromeDriver instance with auto-managed driver.
     """
     settings = get_settings()
     options = _build_chrome_options(settings)
@@ -45,12 +46,15 @@ def browser() -> Generator[webdriver.Chrome, None, None]:
                 options=options,
             )
         else:
-            # Local ChromeDriver fallback
+            # Local ChromeDriver with auto-management
             if settings.chromedriver_path:
+                # Use manually specified path if provided
                 service = ChromeService(executable_path=settings.chromedriver_path)
                 driver = webdriver.Chrome(service=service, options=options)
             else:
-                driver = webdriver.Chrome(options=options)
+                # Auto-install and manage ChromeDriver
+                service = ChromeService(ChromeDriverManager().install())
+                driver = webdriver.Chrome(service=service, options=options)
 
         driver.set_page_load_timeout(settings.selenium_pageload_timeout)
         driver.implicitly_wait(settings.selenium_implicit_wait)
@@ -64,10 +68,9 @@ def browser() -> Generator[webdriver.Chrome, None, None]:
 
 
 class SmartMedicalClient:
-    """Placeholder client for SmartMedical website interactions.
+    """Client for SmartMedical website interactions.
 
-    Methods are intentionally not implemented. They should navigate the website
-    and perform scraping/booking using Selenium.
+    For now, delegates to scraping utilities implemented in app.smartmedical.scraping.
     """
 
     def __init__(self) -> None:
@@ -75,8 +78,13 @@ class SmartMedicalClient:
         pass
 
     def get_timetable(self, doctor: Optional[str], date_str: Optional[str]) -> List[dict]:
-        raise NotImplementedError("SmartMedical timetable scraping is not implemented yet.")
+        # Lazy import to avoid circular dependencies
+        from app.smartmedical.scraping import fetch_timetable
+        resp = fetch_timetable(doctor=doctor, date_str=date_str)
+        # Return just slots for backward compatibility with previous call site
+        return resp.get("slots", [])
 
     def book(self, booking_payload: dict) -> dict:
+        # Still not implemented; keep explicit error for booking
         raise NotImplementedError("SmartMedical booking automation is not implemented yet.")
 

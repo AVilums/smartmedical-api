@@ -13,8 +13,8 @@ from app.core.exceptions import ErrorCodes
 from app.core.schemas import TimetableResponse, ErrorResponse
 from app.api.dependencies import principal_id
 from app.infrastructure.rate_limit import enforce_rate_limit
-from app.infrastructure.selenium_client import SmartMedicalClient
 from app.smartmedical.auth import login as sm_login
+from app.smartmedical.scraping import fetch_timetable
 
 logger = logging.getLogger(__name__)
 
@@ -50,9 +50,13 @@ async def get_timetable(
                     logger.info("SmartMedical login attempted before timetable", extra={"route": "/timetable", "principal": pid})
                 except Exception as e:
                     logger.warning("SmartMedical login failed/skipped", extra={"route": "/timetable", "principal": pid, "error": str(e)})
-            client = SmartMedicalClient()
-            _ = client.get_timetable(doctor=doctor, date_str=(date_param.isoformat() if date_param else None))
-            return TimetableResponse(doctor=doctor, date=date_param, slots=[], source="smartmedical")
+            # Fetch timetable via scraping module (runs in a thread to avoid blocking loop)
+            resp = await asyncio.to_thread(
+                fetch_timetable,
+                doctor=doctor,
+                date_str=(date_param.isoformat() if date_param else None),
+            )
+            return TimetableResponse(**resp)
     except NotImplementedError as exc:
         logger.info(
             "Timetable not implemented",

@@ -44,12 +44,15 @@ def test_auth_required():
     assert r2.status_code == 401
 
 
-def test_timetable_not_implemented():
+def test_timetable_implemented_returns_placeholder():
     client = make_client({'API_KEY': 'test-key'})
     r = client.get('/timetable', headers={'X-API-Key': 'test-key'})
-    assert r.status_code == 501
+    assert r.status_code == 200
     body = r.json()
-    assert 'error' in body
+    assert body.get('source') == 'smartmedical'
+    assert isinstance(body.get('slots'), list)
+    # Expect at least 35 days worth of entries (plus optional meta)
+    assert len(body['slots']) >= 35
 
 
 def test_book_not_implemented():
