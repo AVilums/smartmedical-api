@@ -5,6 +5,8 @@ from typing import Generator
 import pytest
 from fastapi.testclient import TestClient
 
+pytestmark = pytest.mark.local
+
 
 def make_client(env: dict) -> TestClient:
     os.environ.update(env)
