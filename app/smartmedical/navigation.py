@@ -71,7 +71,6 @@ def navigate_to_timetable_nr10(driver, timeout: Optional[int] = None) -> bool:
 
     try:
         # Click the hidden menu link directly (no hover): //a[@id='sm-31'] in default content
-        print("Waiting for timetable menu link...")
         menu_link = wait.until(EC.presence_of_element_located((By.XPATH, sm_sel.XPATH_TIMETABLE_MENU_LINK)))
         try:
             driver.execute_script("arguments[0].click();", menu_link)
@@ -83,7 +82,6 @@ def navigate_to_timetable_nr10(driver, timeout: Optional[int] = None) -> bool:
                 pass
 
         # Switch into the main content iframe before clicking Nr_10
-        print("Switching into main content iframe before clicking Nr_10...")
         try:
             driver.switch_to.default_content()
         except Exception:
@@ -101,7 +99,6 @@ def navigate_to_timetable_nr10(driver, timeout: Optional[int] = None) -> bool:
 
         # Wait for the Nr_10 row and click it
         pre_handles = set(driver.window_handles)
-        print("Waiting for Nr_10 row...")
         nr10_row = wait.until(EC.presence_of_element_located((By.XPATH, sm_sel.XPATH_NR10_ROW)))
         try:
             nr10_row.click()
