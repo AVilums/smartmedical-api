@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -12,14 +13,14 @@ from app.infrastructure.logging_config import configure_logging
 
 logger = logging.getLogger(__name__)
 
-app = FastAPI(title="SmartMedical Automation Service", version="0.1.0")
-
-
-@app.on_event("startup")
-async def on_startup() -> None:
+@asynccontextmanager
+async def lifespan(app: FastAPI):
     configure_logging()
     s = get_settings()
     logger.info("Service starting", extra={"bind": f"{s.bind_host}:{s.port}", "log_json": s.log_json})
+    yield
+
+app = FastAPI(title="SmartMedical Automation Service", version="0.1.0", lifespan=lifespan)
 
 
 # CORS

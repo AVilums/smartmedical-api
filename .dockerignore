@@ -4,6 +4,7 @@ __pycache__
 *.pyd
 *.pytest_cache
 .git
+.github
 .gitignore
 .vscode
 .idea
