@@ -10,6 +10,7 @@ import re
 import time
 from typing import Any, Dict, List, Optional, Tuple
 from datetime import date
+from math import gcd
 
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -135,6 +136,14 @@ def _scrape_week(driver, settings) -> Tuple[List[Dict[str, Any]], List[str]]:
         except Exception:
             continue
 
+    # Infer base interval per (date, doctor) from raw potentials and reservations
+    interval_map: Dict[Tuple[str, Optional[str]], Optional[int]] = {}
+    for key, pots in pot_map.items():
+        d, doc = key
+        occ_for_doc = res_map.get((d, doc), [])
+        occ_unknown = res_unknown_by_date.get(d, [])
+        interval_map[key] = _infer_interval(pots, occ_for_doc + occ_unknown)
+
     # Compute free intervals per (date, doctor): union(potential) - union(reservations)
     free_slots: List[Dict[str, Any]] = []
     # Determine all doctor keys present in potentials
@@ -147,14 +156,18 @@ def _scrape_week(driver, settings) -> Tuple[List[Dict[str, Any]], List[str]]:
         # Merge both occupied sets
         occ = _merge_intervals(occ_for_doc + occ_unknown)
         free = _subtract_intervals(pot, occ)
+        inferred = interval_map.get((date, doc))
         for start_m, end_m in free:
-            free_slots.append({
+            slot = {
                 "date": date,
                 "start": _to_hhmm(start_m),
                 "end": _to_hhmm(end_m),
                 "doctor": doc,
                 "type": "free",
-            })
+            }
+            if inferred is not None:
+                slot["interval"] = str(inferred)
+            free_slots.append(slot)
 
     return free_slots, sorted(week_dates)
 
@@ -283,3 +296,27 @@ def _subtract_intervals(potentials: List[Tuple[int, int]], occupied: List[Tuple[
         if cur < pe:
             result.append((cur, pe))
     return result
+
+
+def _infer_interval(
+    potentials: List[Tuple[int, int]],
+    occupied: List[Tuple[int, int]]
+) -> Optional[int]:
+    """Infer base timeslot interval from potential and occupied time blocks."""
+    # Calculate durations from both potentials and occupied blocks
+    durations: List[int] = [
+        e - s for seq in (potentials, occupied) for s, e in seq if e > s
+    ]
+    # Filter out implausible durations
+    durations = [d for d in durations if 5 <= d <= 180]
+    if not durations:
+        return None
+
+    # Compute GCD of durations and prefer sane range (10 to 60 mins)
+    g = durations[0]
+    for d in durations[1:]:
+        g = gcd(g, d)
+        if g == 1:  # No meaningful GCD, break early
+            break
+
+    return g if 10 <= g <= 60 else min(durations)  # Fallback to minimum plausible duration

@@ -10,6 +10,7 @@ from fastapi.responses import JSONResponse
 class UTF8JSONResponse(JSONResponse):
     # Ensure PowerShell and other clients correctly decode the JSON as UTF-8
     media_type = "application/json; charset=utf-8"
+
 from fastapi.exceptions import RequestValidationError
 
 from app.core.config import get_settings
