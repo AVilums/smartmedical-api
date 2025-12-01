@@ -6,10 +6,13 @@ XPATH_PASSWORD_INPUT = "//input[@id='MainContent_password']"
 XPATH_LOGIN_BUTTON = "//input[@type='submit' and @name='sendpost']"
 
 # Post-login
+XPATH_CLOSE_POPUP = "//input[@value='Aizvērt']"
 XPATH_HEADER_CONTAINER = "//td[@id='header-container']"
 
 # Frames
 XPATH_MAIN_IFRAME = "//iframe[@name='_center' or contains(@src,'main.php')]"
+XPATH_POPUP_IFRAME = "//iframe[@id='_popup_1']"
+
 # Inner frames within the main iframe (frameset: left menu, right content)
 XPATH_LEFT_FRAME = "//frame[@name='_menu_frame' or contains(@src,'_menu_frame.php')]"
 XPATH_RIGHT_FRAME = "//frame[@name='_content_frame']"
