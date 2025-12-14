@@ -70,7 +70,7 @@ def test_create_booking_like_fetch_timetable():
     # Print result to help during manual/local runs as in test_fetch_timetable
     print(f"Booking result: {result}")
 
-    # Basic shape checks similar in spirit to timetable test
+    # Basic shape checks similar in spirit to the timetable test
     assert isinstance(result, dict)
     assert "status" in result
     # Allow statuses: ok, unavailable, error
