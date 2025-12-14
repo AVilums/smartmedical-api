@@ -1,6 +1,8 @@
 """Authentication utilities for the SmartMedical portal.
 
 Lightweight Selenium-based login flow to vm528.smartmedical.eu, styled similar to navigation.
+Supports two-factor authentication (TFA) using time-based one-time passwords (TOTP).
+The OTP secret key is configured via the SMARTMEDICAL_OTP_SECRET environment variable.
 """
 from __future__ import annotations
 
@@ -14,11 +16,12 @@ from selenium.common.exceptions import TimeoutException
 from app.core.config import get_settings
 from app.infrastructure.selenium_client import browser
 from app.smartmedical import selectors as sm_sel
-
+from app.smartmedical.otp import generate_otp
 
 def perform_login(driver, username: str, password: str, timeout: Optional[int] = None) -> bool:
     """Log in using a provided driver and credentials. Returns True on success.
 
+    Handles two-factor authentication by generating and entering an OTP code.
     Raises RuntimeError on timeout or unexpected page state.
     """
     settings = get_settings()
@@ -39,9 +42,27 @@ def perform_login(driver, username: str, password: str, timeout: Optional[int] =
         except Exception:
             # Some inputs may not support clear(); continue
             pass
+
         u_input.send_keys(username)
         p_input.send_keys(password)
         driver.find_element(By.XPATH, sm_sel.XPATH_LOGIN_BUTTON).click()
+        
+        # Wait for TFA code input to be clickable
+        wait.until(EC.element_to_be_clickable((By.XPATH, sm_sel.XPATH_TFA_CODE_INPUT)))
+
+        # Generate OTP if secret is available
+        if settings.smartmedical_otp_secret:
+            otp_code = generate_otp(settings.smartmedical_otp_secret)
+
+            # Enter OTP code
+            tfa_input = driver.find_element(By.XPATH, sm_sel.XPATH_TFA_CODE_INPUT)
+            tfa_input.clear()
+            tfa_input.send_keys(otp_code)
+
+            # Click continue button
+            driver.find_element(By.XPATH, sm_sel.XPATH_CONTINUE_TFA_BUTTON).click()
+        else:
+            raise RuntimeError("OTP secret key not provided but TFA is enabled")
 
         # Handle pop-up in a separate iFrame
         try:

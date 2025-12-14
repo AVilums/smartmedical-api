@@ -44,6 +44,10 @@ XPATH_SAVE_BUTTON = "//input[@id='save']"
 # For verification
 XPATH_TIME_FROM = "//input[@id='time_from']"
 
+# Two-Factor Authentication
+XPATH_TFA_CODE_INPUT = "//input[@id='tfa_code']"
+XPATH_CONTINUE_TFA_BUTTON = "//input[@id='continueTfa']"
+
 # Placeholders for future flows
 TIMETABLE_TABLE = "#timetable"
 BOOK_BUTTON = "#book-btn"

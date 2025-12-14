@@ -45,6 +45,7 @@ class Settings(BaseSettings):
     smartmedical_base_url: str = Field(default="https://vm528.smartmedical.eu/", alias="SMARTMEDICAL_BASE_URL")
     smartmedical_username: str | None = Field(default=None, alias="SMARTMEDICAL_USERNAME")
     smartmedical_password: str | None = Field(default=None, alias="SMARTMEDICAL_PASSWORD")
+    smartmedical_otp_secret: str | None = Field(default=None, alias="SMARTMEDICAL_OTP_SECRET")
     smartmedical_login_on_timetable: bool = Field(default=True, alias="SMARTMEDICAL_LOGIN_ON_TIMETABLE")
 
     # Logging
